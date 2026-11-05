@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import type { Question } from "@/data/questions";
+import { hideCorrectAnswer, type Question } from "@/data/questions";
 import type { StoredAnswer } from "@/lib/storage";
 
 type QuestionViewProps = {
@@ -7,6 +7,7 @@ type QuestionViewProps = {
   index: number;
   total: number;
   feedback: StoredAnswer | null;
+  choiceIds: string[];
   onAnswer: (given: string) => void;
   onNext: () => void;
 };
@@ -16,10 +17,18 @@ export function QuestionView({
   index,
   total,
   feedback,
+  choiceIds,
   onAnswer,
   onNext,
 }: QuestionViewProps) {
   const [draft, setDraft] = useState("");
+  const choices =
+    question.type === "choice"
+      ? choiceIds.flatMap((id) => {
+          const choice = question.choices.find((item) => item.id === id);
+          return choice ? [choice] : [];
+        })
+      : [];
   const answered = feedback !== null;
   const progress = ((index + (answered ? 1 : 0)) / total) * 100;
   const canSubmit = draft.trim().length > 0;
@@ -53,14 +62,18 @@ export function QuestionView({
 
         {question.type === "choice" ? (
           <div className="mt-6 flex flex-col gap-3" role="radiogroup" aria-label="Svarsalternativ">
-            {question.choices.map((choice) => {
+            {choices.map((choice) => {
               const selected = (feedback?.given ?? draft) === choice.id;
               const isCorrectChoice = choice.id === question.correctChoiceId;
               let tone = "border-slate-200 bg-white text-slate-950";
-              if (!answered && selected) tone = "border-slate-950 bg-slate-950 text-white";
-              if (answered && isCorrectChoice) tone = "border-emerald-700 bg-emerald-50 text-emerald-950";
-              if (answered && selected && !isCorrectChoice) {
+              if (!answered && selected) {
+                tone = "border-slate-950 bg-slate-950 text-white";
+              } else if (answered && selected && feedback?.correct) {
+                tone = "border-emerald-700 bg-emerald-50 text-emerald-950";
+              } else if (answered && selected && feedback && !feedback.correct) {
                 tone = "border-rose-700 bg-rose-50 text-rose-950";
+              } else if (answered && !hideCorrectAnswer && isCorrectChoice) {
+                tone = "border-emerald-700 bg-emerald-50 text-emerald-950";
               }
               return (
                 <button
@@ -104,15 +117,19 @@ export function QuestionView({
                 }`}
               >
                 <p className="text-lg font-semibold">{feedback.correct ? "Rätt" : "Fel"}</p>
-                <p className="mt-1 text-base">Rätt svar: {question.displayAnswer}</p>
-                <p className="mt-2 text-base leading-relaxed">{question.explanation}</p>
+                {hideCorrectAnswer ? null : (
+                  <>
+                    <p className="mt-1 text-base">Rätt svar: {question.displayAnswer}</p>
+                    <p className="mt-2 text-base leading-relaxed">{question.explanation}</p>
+                  </>
+                )}
               </div>
               <button
                 type="button"
                 onClick={onNext}
                 className="h-14 rounded-2xl bg-slate-950 text-lg font-semibold text-white"
               >
-                {index === total - 1 ? "Se resultat" : "Nästa"}
+                Nästa
               </button>
             </div>
           ) : (

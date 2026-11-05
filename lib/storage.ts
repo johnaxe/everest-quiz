@@ -12,10 +12,11 @@ export type QuizProgress = {
   currentIndex: number;
   answers: StoredAnswer[];
   completed: boolean;
+  tiebreak: string | null;
 };
 
 export function emptyProgress(): QuizProgress {
-  return { currentIndex: 0, answers: [], completed: false };
+  return { currentIndex: 0, answers: [], completed: false, tiebreak: null };
 }
 
 function isProgress(value: unknown): value is QuizProgress {
@@ -25,6 +26,12 @@ function isProgress(value: unknown): value is QuizProgress {
   if (typeof progress.currentIndex !== "number") return false;
   if (typeof progress.completed !== "boolean") return false;
   if (progress.answers.length > questions.length) return false;
+  if (
+    progress.tiebreak != null &&
+    (typeof progress.tiebreak !== "string" || !/^\d+$/.test(progress.tiebreak))
+  ) {
+    return false;
+  }
 
   for (let index = 0; index < progress.answers.length; index++) {
     const answer = progress.answers[index];
@@ -39,6 +46,10 @@ function isProgress(value: unknown): value is QuizProgress {
       progress.answers.length === questions.length &&
       progress.currentIndex === questions.length
     );
+  }
+
+  if (progress.currentIndex === questions.length) {
+    return progress.answers.length === questions.length;
   }
 
   if (progress.currentIndex < 0 || progress.currentIndex >= questions.length) {
@@ -60,7 +71,7 @@ export function loadProgress(): QuizProgress | null {
       localStorage.removeItem(STORAGE_KEY);
       return null;
     }
-    return parsed;
+    return { ...parsed, tiebreak: parsed.tiebreak ?? null };
   } catch {
     return null;
   }

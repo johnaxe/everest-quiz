@@ -11,7 +11,7 @@ const geistSans = Geist({
 export const metadata: Metadata = {
   title: "Everest-quiz",
   description:
-    "Tio svåra frågor om Mount Everest, Hillary och Tenzing Norgay och andra kända bestigningar.",
+    "Tjugo svåra frågor om Mount Everest, från Mallory och Irvine till Hillary, Tenzing Norgay och bestigningarna som följde.",
   applicationName: "Everest-quiz",
   appleWebApp: {
     capable: true,

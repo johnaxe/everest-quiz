@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Everest-quiz",
     short_name: "Everest-quiz",
-    description: "Tio svåra frågor om Mount Everest och kända bestigningar.",
+    description:
+      "Tjugo svåra frågor om Mount Everest, från Mallory och Irvine och framåt.",
     id: "/",
     start_url: "/",
     scope: "/",

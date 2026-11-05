@@ -1,12 +1,19 @@
-import { formatGiven, questions } from "@/data/questions";
+import {
+  formatGiven,
+  hideCorrectAnswer,
+  questions,
+  tiebreakSummary,
+  tiebreaker,
+} from "@/data/questions";
 import type { StoredAnswer } from "@/lib/storage";
 
 type ResultScreenProps = {
   answers: StoredAnswer[];
+  tiebreak: string | null;
   onRestart: () => void;
 };
 
-export function ResultScreen({ answers, onRestart }: ResultScreenProps) {
+export function ResultScreen({ answers, tiebreak, onRestart }: ResultScreenProps) {
   const score = answers.filter((answer) => answer.correct).length;
 
   return (
@@ -18,6 +25,23 @@ export function ResultScreen({ answers, onRestart }: ResultScreenProps) {
         {score} av {questions.length}
       </h1>
       <p className="mt-2 text-lg text-slate-700">Du fick {score} rätt.</p>
+      {tiebreak ? (
+        <div className="mt-6 rounded-2xl bg-white px-4 py-4">
+          <p className="text-sm font-semibold tracking-[0.18em] text-slate-500 uppercase">
+            Utslagsfråga
+          </p>
+          <p className="mt-2 text-base leading-snug font-medium text-slate-950">
+            {tiebreaker.prompt}
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-slate-700">Ditt svar: {tiebreak}</p>
+          <p className="mt-1 text-sm leading-relaxed text-slate-700">
+            Facit: {tiebreaker.answer}. {tiebreakSummary(tiebreak)}
+          </p>
+          {hideCorrectAnswer ? (
+            <p className="mt-2 text-sm leading-relaxed text-slate-700">{tiebreaker.explanation}</p>
+          ) : null}
+        </div>
+      ) : null}
       <button
         type="button"
         onClick={onRestart}
@@ -45,6 +69,9 @@ export function ResultScreen({ answers, onRestart }: ResultScreenProps) {
                 <p className="mt-1 text-sm leading-relaxed text-slate-700">
                   Rätt svar: {question.displayAnswer}
                 </p>
+              ) : null}
+              {hideCorrectAnswer ? (
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">{question.explanation}</p>
               ) : null}
             </li>
           );
