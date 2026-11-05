@@ -15,6 +15,12 @@ type ResultScreenProps = {
 
 export function ResultScreen({ answers, tiebreak, onRestart }: ResultScreenProps) {
   const score = answers.filter((answer) => answer.correct).length;
+  const review = questions.flatMap((question, index) => {
+    const answer = answers[index];
+    const correct = answer?.correct ?? false;
+    if (hideCorrectAnswer && !correct) return [];
+    return [{ question, index, answer, correct }];
+  });
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -51,9 +57,7 @@ export function ResultScreen({ answers, tiebreak, onRestart }: ResultScreenProps
       </button>
 
       <ol className="mt-8 flex flex-col gap-3">
-        {questions.map((question, index) => {
-          const answer = answers[index];
-          const correct = answer?.correct ?? false;
+        {review.map(({ question, index, answer, correct }) => {
           return (
             <li key={question.id} className="rounded-2xl bg-white px-4 py-4">
               <p className="text-sm font-semibold text-slate-500">

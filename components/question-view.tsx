@@ -30,6 +30,10 @@ export function QuestionView({
         })
       : [];
   const answered = feedback !== null;
+  const visibleChoices =
+    hideCorrectAnswer && answered && feedback && !feedback.correct
+      ? choices.filter((choice) => choice.id === feedback.given)
+      : choices;
   const progress = ((index + (answered ? 1 : 0)) / total) * 100;
   const canSubmit = draft.trim().length > 0;
 
@@ -62,7 +66,7 @@ export function QuestionView({
 
         {question.type === "choice" ? (
           <div className="mt-6 flex flex-col gap-3" role="radiogroup" aria-label="Svarsalternativ">
-            {choices.map((choice) => {
+            {visibleChoices.map((choice) => {
               const selected = (feedback?.given ?? draft) === choice.id;
               const isCorrectChoice = choice.id === question.correctChoiceId;
               let tone = "border-slate-200 bg-white text-slate-950";
@@ -117,12 +121,14 @@ export function QuestionView({
                 }`}
               >
                 <p className="text-lg font-semibold">{feedback.correct ? "Rätt" : "Fel"}</p>
-                {hideCorrectAnswer ? null : (
+                {!hideCorrectAnswer ? (
                   <>
                     <p className="mt-1 text-base">Rätt svar: {question.displayAnswer}</p>
                     <p className="mt-2 text-base leading-relaxed">{question.explanation}</p>
                   </>
-                )}
+                ) : feedback.correct ? (
+                  <p className="mt-2 text-base leading-relaxed">{question.explanation}</p>
+                ) : null}
               </div>
               <button
                 type="button"
