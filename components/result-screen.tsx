@@ -1,0 +1,55 @@
+import { formatGiven, questions } from "@/data/questions";
+import type { StoredAnswer } from "@/lib/storage";
+
+type ResultScreenProps = {
+  answers: StoredAnswer[];
+  onRestart: () => void;
+};
+
+export function ResultScreen({ answers, onRestart }: ResultScreenProps) {
+  const score = answers.filter((answer) => answer.correct).length;
+
+  return (
+    <main className="mx-auto flex min-h-dvh w-full max-w-lg flex-col px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <p className="text-sm font-medium tracking-[0.18em] text-slate-600 uppercase">
+        Resultat
+      </p>
+      <h1 className="mt-2 text-4xl font-semibold tracking-tight text-slate-950">
+        {score} av {questions.length}
+      </h1>
+      <p className="mt-2 text-lg text-slate-700">Du fick {score} rätt.</p>
+      <button
+        type="button"
+        onClick={onRestart}
+        className="mt-6 h-14 rounded-2xl bg-slate-950 text-lg font-semibold text-white"
+      >
+        Spela igen
+      </button>
+
+      <ol className="mt-8 flex flex-col gap-3">
+        {questions.map((question, index) => {
+          const answer = answers[index];
+          const correct = answer?.correct ?? false;
+          return (
+            <li key={question.id} className="rounded-2xl bg-white px-4 py-4">
+              <p className="text-sm font-semibold text-slate-500">
+                {index + 1}. {correct ? "Rätt" : "Fel"}
+              </p>
+              <p className="mt-1 text-base leading-snug font-medium text-slate-950">
+                {question.prompt}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                Ditt svar: {answer ? formatGiven(question, answer.given) : "—"}
+              </p>
+              {!correct ? (
+                <p className="mt-1 text-sm leading-relaxed text-slate-700">
+                  Rätt svar: {question.displayAnswer}
+                </p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </main>
+  );
+}
